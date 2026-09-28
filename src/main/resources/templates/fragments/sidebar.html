@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="sidebar(active, username, isAdmin)" class="sidebar">
+    <div class="sidebar-brand"><img th:src="@{/img/promtior.svg}" alt="Promtior" class="sidebar-logo"/></div>
+    <nav class="sidebar-nav">
+        <a th:href="@{/home}" th:classappend="${active == 'home'} ? 'active' : ''">
+            <span class="icon"></span><span>Home</span>
+        </a>
+        <a th:href="@{/chat}" th:classappend="${active == 'chat'} ? 'active' : ''">
+            <span class="icon"></span><span>Chat</span>
+        </a>
+        <a th:href="@{/my-bookings}" th:classappend="${active == 'my-bookings'} ? 'active' : ''">
+            <span class="icon"></span><span>Mis Reservas</span>
+        </a>
+        <a th:if="${isAdmin}" th:href="@{/admin/settings}" th:classappend="${active == 'admin'} ? 'active' : ''">
+            <span class="icon"></span><span>Ajustes de reserva</span>
+        </a>
+        <a th:if="${isAdmin}" th:href="@{/admin/schedule}" th:classappend="${active == 'admin-schedule'} ? 'active' : ''">
+            <span class="icon"></span><span>Agenda semanal</span>
+        </a>
+        <a th:if="${isAdmin}" th:href="@{/admin/rooms}" th:classappend="${active == 'admin-rooms'} ? 'active' : ''">
+            <span class="icon"></span><span>Salas</span>
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <span class="username" th:text="${username}">Usuario</span>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit">Cerrar sesión</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

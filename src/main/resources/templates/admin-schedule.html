@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Agenda semanal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            color-scheme: light;
+            --background: #f5f4f4;
+            --sidebar-bg: #171717;
+            --sidebar-text: #b8b6b3;
+            --sidebar-active: #ffffff;
+            --sidebar-accent: #c4b8e0;
+            --card-bg: #ffffff;
+            --text: #171717;
+            --text-muted: #82797d;
+            --border: #e5e3e2;
+            --accent: #171717;
+            --accent-hover: #2b2b2b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            font-family: 'Geist', "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+        }
+
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-logo {
+            width: 120px;
+            height: auto;
+            display: block;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--sidebar-active);
+            border-left-color: var(--sidebar-accent);
+        }
+
+        .sidebar-nav .icon {
+            font-size: 1.05rem;
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-footer .username {
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-footer form {
+            margin: 0;
+        }
+
+        .sidebar-footer button {
+            width: 100%;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .sidebar-footer button:hover {
+            background: var(--background);
+        }
+
+        main {
+            flex: 1;
+            min-width: 0;
+            padding: 32px;
+        }
+
+        .schedule-content {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .filter-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 12px 32px rgba(23, 23, 23, 0.08);
+            padding: 24px 28px;
+        }
+
+        .filter-card h1 {
+            margin: 0 0 4px;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 1.4rem;
+        }
+
+        .filter-card .range {
+            margin: 0 0 18px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: end;
+            gap: 14px;
+        }
+
+        .filter-form .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-form label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text);
+        }
+
+        .filter-form input {
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .filter-form button.submit {
+            padding: 10px 18px;
+            font-weight: 600;
+            color: #fff;
+            background: var(--accent);
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .filter-form button.submit:hover {
+            background: var(--accent-hover);
+        }
+
+        .week-nav {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+            flex-wrap: wrap;
+        }
+
+        .week-nav a {
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .week-nav a:hover {
+            background: var(--background);
+        }
+
+        .day-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 12px 32px rgba(23, 23, 23, 0.08);
+            padding: 0;
+        }
+
+        .day-card summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 20px 24px;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .day-card summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .day-card summary::before {
+            content: '▸';
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-right: 2px;
+        }
+
+        .day-card[open] summary::before {
+            content: '▾';
+        }
+
+        .day-card summary h2 {
+            margin: 0;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 1.1rem;
+        }
+
+        .day-card summary .day-date {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .day-card summary .day-count {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            margin-left: auto;
+        }
+
+        .day-card .day-body {
+            padding: 0 24px 20px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.88rem;
+            white-space: nowrap;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.03em;
+        }
+
+        td {
+            color: var(--text);
+        }
+
+        .status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status.active {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .status.other {
+            background: #f3f4f6;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .empty-week {
+            padding: 40px 24px;
+            text-align: center;
+        }
+
+        .empty-week .empty-state {
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 8px 16px;
+                padding: 12px 16px;
+            }
+
+            .sidebar-brand {
+                padding: 0;
+                margin-right: 4px;
+            }
+
+            .sidebar-logo {
+                width: 90px;
+            }
+
+            .sidebar-nav {
+                flex: 1 1 auto;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .sidebar-nav a {
+                padding: 6px 10px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+
+            .sidebar-nav a.active {
+                border-left-color: transparent;
+                border-bottom-color: var(--sidebar-accent);
+            }
+
+            .sidebar-footer {
+                flex-direction: row;
+                align-items: center;
+                border-top: none;
+                padding: 0;
+                gap: 10px;
+            }
+
+            .sidebar-footer button {
+                width: auto;
+            }
+
+            main {
+                padding: 16px;
+            }
+
+            .filter-card {
+                padding: 16px;
+            }
+
+            .day-card summary {
+                padding: 16px;
+            }
+
+            .day-card .day-body {
+                padding: 0 16px 16px;
+            }
+
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-form .field, .filter-form button.submit {
+                width: 100%;
+            }
+
+            .week-nav {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .week-nav a {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar(active='admin-schedule', username=${username}, isAdmin=${isAdmin})}"></div>
+<main>
+    <div class="schedule-content">
+        <div class="filter-card">
+            <h1>Agenda semanal</h1>
+            <p class="range">
+                Semana del <span th:text="${#temporals.format(weekStart, 'dd/MM/yyyy')}">01/01/2024</span>
+                al <span th:text="${#temporals.format(weekEnd, 'dd/MM/yyyy')}">07/01/2024</span>
+            </p>
+            <form class="filter-form" th:action="@{/admin/schedule}" method="get">
+                <div class="field">
+                    <label for="weekStart">Semana (elegí cualquier día)</label>
+                    <input type="date" id="weekStart" name="weekStart" th:value="${weekStart}"/>
+                </div>
+                <div class="field">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" name="username" placeholder="Nombre de usuario" th:value="${usernameFilter}"/>
+                </div>
+                <button class="submit" type="submit">Filtrar</button>
+                <div class="week-nav">
+                    <a th:href="@{/admin/schedule(weekStart=${previousWeek}, username=${usernameFilter})}">◀ Semana anterior</a>
+                    <a th:href="@{/admin/schedule(weekStart=${today}, username=${usernameFilter})}">Hoy</a>
+                    <a th:href="@{/admin/schedule(weekStart=${nextWeek}, username=${usernameFilter})}">Semana siguiente ▶</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="day-card empty-week" th:if="${#lists.isEmpty(days)}">
+            <p class="empty-state">Esta semana no tiene reservas.</p>
+        </div>
+
+        <details class="day-card" th:each="day : ${days}" th:with="bookingCount=${#lists.size(day.bookings())}">
+            <summary>
+                <h2 th:text="${day.dayName()}">Lunes</h2>
+                <span class="day-date" th:text="${#temporals.format(day.date(), 'dd/MM/yyyy')}">01/01/2024</span>
+                <span class="day-count"
+                      th:text="${bookingCount} + ${bookingCount == 1 ? ' reserva' : ' reservas'}">0 reservas</span>
+            </summary>
+
+            <div class="day-body">
+                <p class="empty-state" th:if="${#lists.isEmpty(day.bookings())}">Sin reservas este día.</p>
+                <div class="table-wrap" th:unless="${#lists.isEmpty(day.bookings())}">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Sala</th>
+                            <th>Usuario</th>
+                            <th>Asistentes</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
+                            <th>Estado</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="booking : ${day.bookings()}">
+                            <td th:text="${booking.roomName}">Sala</td>
+                            <td th:text="${booking.userName}">Usuario</td>
+                            <td th:text="${booking.attendeeCount}">1</td>
+                            <td th:text="${#temporals.format(booking.startTime, 'HH:mm')}">09:00</td>
+                            <td th:text="${#temporals.format(booking.endTime, 'HH:mm')}">09:30</td>
+                            <td>
+                                <span class="status"
+                                      th:classappend="${booking.status.name() == 'ACTIVE'} ? 'active' : 'other'"
+                                      th:text="${booking.status}">Estado</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </details>
+    </div>
+</main>
+</body>
+</html>

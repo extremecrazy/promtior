@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            color-scheme: light;
+            --background: #f5f4f4;
+            --sidebar-bg: #171717;
+            --sidebar-text: #b8b6b3;
+            --sidebar-active: #ffffff;
+            --sidebar-accent: #c4b8e0;
+            --card-bg: #ffffff;
+            --text: #171717;
+            --text-muted: #82797d;
+            --border: #e5e3e2;
+            --accent: #171717;
+            --accent-hover: #2b2b2b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            font-family: 'Geist', "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+        }
+
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-logo {
+            width: 120px;
+            height: auto;
+            display: block;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--sidebar-active);
+            border-left-color: var(--sidebar-accent);
+        }
+
+        .sidebar-nav .icon {
+            font-size: 1.05rem;
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-footer .username {
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-footer form {
+            margin: 0;
+        }
+
+        .sidebar-footer button {
+            width: 100%;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .sidebar-footer button:hover {
+            background: var(--background);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .home-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 12px 32px rgba(23, 23, 23, 0.08);
+            padding: 40px;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        .home-card h1 {
+            margin: 0 0 12px;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .home-card p {
+            margin: 0 0 20px;
+            color: var(--text-muted);
+        }
+
+        .home-card a.cta {
+            display: inline-block;
+            padding: 12px 22px;
+            font-weight: 600;
+            color: #fff;
+            background: var(--accent);
+            border-radius: 999px;
+            text-decoration: none;
+        }
+
+        .home-card a.cta:hover {
+            background: var(--accent-hover);
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar(active='home', username=${username}, isAdmin=${isAdmin})}"></div>
+<main>
+    <div class="home-card">
+        <h1>Bienvenido</h1>
+        <p>Gestioná tus reservas de salas hablando con el asistente.</p>
+        <a class="cta" th:href="@{/chat}">Ir al asistente de reservas</a>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Chat de reservas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            color-scheme: light;
+            --background: #f5f4f4;
+            --sidebar-bg: #171717;
+            --sidebar-text: #b8b6b3;
+            --sidebar-active: #ffffff;
+            --sidebar-accent: #c4b8e0;
+            --card-bg: #ffffff;
+            --text: #171717;
+            --text-muted: #82797d;
+            --border: #e5e3e2;
+            --accent: #171717;
+            --accent-hover: #2b2b2b;
+            --bubble-user: #171717;
+            --bubble-bot: #f5f4f4;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            font-family: 'Geist', "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+        }
+
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-logo {
+            width: 120px;
+            height: auto;
+            display: block;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--sidebar-active);
+            border-left-color: var(--sidebar-accent);
+        }
+
+        .sidebar-nav .icon {
+            font-size: 1.05rem;
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-footer .username {
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-footer form {
+            margin: 0;
+        }
+
+        .sidebar-footer button {
+            width: 100%;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .sidebar-footer button:hover {
+            background: var(--background);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .chat-card {
+            width: 100%;
+            max-width: 640px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 12px 32px rgba(23, 23, 23, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #messages {
+            flex: 1;
+            min-height: 420px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .bubble {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            font-size: 0.92rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        .bubble.user {
+            align-self: flex-end;
+            background: var(--bubble-user);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bubble.bot {
+            align-self: flex-start;
+            background: var(--bubble-bot);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .bubble.error {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .bubble.warning {
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .bubble.typing {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 14px 16px;
+        }
+
+        .bubble.typing .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            animation: typing-bounce 1.2s infinite ease-in-out;
+        }
+
+        .bubble.typing .dot:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .bubble.typing .dot:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes typing-bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-4px);
+                opacity: 1;
+            }
+        }
+
+        form#chat-form {
+            display: flex;
+            gap: 10px;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 12px 14px;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        #chat-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(196, 184, 224, 0.4);
+        }
+
+        #chat-form button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            background: var(--accent);
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        #chat-form button:hover {
+            background: var(--accent-hover);
+        }
+
+        #chat-form button:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar(active='chat', username=${username}, isAdmin=${isAdmin})}"></div>
+<main>
+    <div class="chat-card">
+        <div id="messages"></div>
+        <form id="chat-form">
+            <input type="text" id="chat-input" autocomplete="off" placeholder="Escribí tu consulta o pedido de reserva..." required="required"/>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+</main>
+<script th:inline="javascript">
+    const messagesEl = document.getElementById('messages');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+    function escapeHtml(text) {
+        const scratch = document.createElement('div');
+        scratch.textContent = text;
+        return scratch.innerHTML;
+    }
+
+
+    function renderMarkdown(text) {
+        return escapeHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function addBubble(text, kind) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble ' + kind;
+        bubble.innerHTML = renderMarkdown(text);
+        messagesEl.appendChild(bubble);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return bubble;
+    }
+
+    function showTyping() {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble bot typing';
+        bubble.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+        messagesEl.appendChild(bubble);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return bubble;
+    }
+
+    addBubble('¡Hola! Contame qué necesitás: consultar salas, reservar, reprogramar o cancelar.', 'bot');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const message = input.value.trim();
+        if (!message) {
+            return;
+        }
+        addBubble(message, 'user');
+        input.value = '';
+        input.disabled = true;
+        form.querySelector('button').disabled = true;
+        const typingBubble = showTyping();
+        try {
+            const response = await fetch('/chat/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({message: message})
+            });
+            if (response.status === 503 || response.status === 504) {
+                // Asistente saturado o sin responder: el backend manda el aviso en `detail`
+                const problem = await response.json().catch(() => ({}));
+                typingBubble.remove();
+                addBubble(problem.detail || 'El asistente no está disponible en este momento. Intentá de nuevo en unos segundos.', 'warning');
+                return;
+            }
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            const data = await response.json();
+            typingBubble.remove();
+            addBubble(data.reply, 'bot');
+        } catch (err) {
+            typingBubble.remove();
+            addBubble('Ocurrió un error al procesar tu mensaje. Intentá de nuevo.', 'error');
+        } finally {
+            input.disabled = false;
+            form.querySelector('button').disabled = false;
+            input.focus();
+        }
+    });
+</script>
+</body>
+</html>

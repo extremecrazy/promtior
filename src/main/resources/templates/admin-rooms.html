@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Salas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            color-scheme: light;
+            --background: #f5f4f4;
+            --sidebar-bg: #171717;
+            --sidebar-text: #b8b6b3;
+            --sidebar-active: #ffffff;
+            --sidebar-accent: #c4b8e0;
+            --card-bg: #ffffff;
+            --text: #171717;
+            --text-muted: #82797d;
+            --border: #e5e3e2;
+            --accent: #171717;
+            --accent-hover: #2b2b2b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            font-family: 'Geist', "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+            background: var(--background);
+        }
+
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-logo {
+            width: 120px;
+            height: auto;
+            display: block;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--sidebar-active);
+            border-left-color: var(--sidebar-accent);
+        }
+
+        .sidebar-nav .icon {
+            font-size: 1.05rem;
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-footer .username {
+            font-weight: 600;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-footer form {
+            margin: 0;
+        }
+
+        .sidebar-footer button {
+            width: 100%;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .sidebar-footer button:hover {
+            background: var(--background);
+        }
+
+        main {
+            flex: 1;
+            min-width: 0;
+            padding: 32px;
+        }
+
+        .rooms-content {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 12px 32px rgba(23, 23, 23, 0.08);
+            padding: 24px 28px;
+        }
+
+        .header-card h1 {
+            margin: 0 0 4px;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 1.4rem;
+        }
+
+        .header-card .subtitle {
+            margin: 0 0 18px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 8px;
+            align-items: end;
+        }
+
+        .toolbar .spacer {
+            margin-left: auto;
+        }
+
+        .toolbar .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .toolbar label {
+            font-weight: 600;
+            font-size: 0.78rem;
+            color: var(--text);
+        }
+
+        .toolbar input[type="text"],
+        .toolbar input[type="number"] {
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .toolbar input[name="name"] {
+            width: 200px;
+        }
+
+        .modal-form input[name="maxCapacity"] {
+            width: 100%;
+        }
+
+        .checkbox-field {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
+            padding-bottom: 9px;
+        }
+
+        .checkbox-field input {
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            padding: 0 18px;
+            font-weight: 600;
+            background: #fff;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-secondary:hover {
+            background: var(--background);
+        }
+
+        .btn-secondary.disabled {
+            opacity: 0.4;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 4px 0;
+        }
+
+        .page-info {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 12px 32px rgba(23, 23, 23, 0.08);
+            padding: 8px 28px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        tr:last-child > td {
+            border-bottom: none;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.03em;
+        }
+
+        td {
+            color: var(--text);
+        }
+
+        td.capacity, th.capacity {
+            text-align: right;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status.active {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .status.other {
+            background: #f3f4f6;
+            color: var(--text-muted);
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .icon-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .icon-btn:hover {
+            background: var(--background);
+            color: var(--text);
+        }
+
+        .icon-btn.danger {
+            color: #b91c1c;
+        }
+
+        .icon-btn.danger:hover {
+            background: #fef2f2;
+        }
+
+        .icon-btn.success {
+            color: #047857;
+        }
+
+        .icon-btn.success:hover {
+            background: #ecfdf5;
+        }
+
+        .edit-row {
+            display: none;
+        }
+
+        .inline-edit-form {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: end;
+            gap: 12px;
+            padding: 6px 0;
+        }
+
+        .inline-edit-form .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .inline-edit-form label {
+            font-weight: 600;
+            font-size: 0.78rem;
+            color: var(--text);
+        }
+
+        .inline-edit-form input {
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .inline-edit-form input[name="name"] {
+            min-width: 180px;
+        }
+
+        .inline-edit-form input[name="maxCapacity"] {
+            width: 100px;
+        }
+
+        .inline-edit-form .actions-inline {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        button.submit {
+            padding: 10px 18px;
+            font-weight: 600;
+            color: #fff;
+            background: var(--accent);
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        button.submit:hover {
+            background: var(--accent-hover);
+        }
+
+        button.cancel {
+            padding: 10px 18px;
+            font-weight: 600;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        button.cancel:hover {
+            background: var(--background);
+        }
+
+        .empty-state {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin: 0;
+            padding: 20px 0;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(23, 23, 23, 0.5);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 50;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(23, 23, 23, 0.25);
+            padding: 28px;
+        }
+
+        .modal-card h2 {
+            margin: 0 0 20px;
+            font-family: 'Fraunces', Georgia, serif;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 1.2rem;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-form .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .modal-form label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text);
+        }
+
+        .modal-form input[type="text"],
+        .modal-form input[type="number"] {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .modal-message {
+            margin: 0 0 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 8px 16px;
+                padding: 12px 16px;
+            }
+
+            .sidebar-brand {
+                padding: 0;
+                margin-right: 4px;
+            }
+
+            .sidebar-logo {
+                width: 90px;
+            }
+
+            .sidebar-nav {
+                flex: 1 1 auto;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .sidebar-nav a {
+                padding: 6px 10px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+
+            .sidebar-nav a.active {
+                border-left-color: transparent;
+                border-bottom-color: var(--sidebar-accent);
+            }
+
+            .sidebar-footer {
+                flex-direction: row;
+                align-items: center;
+                border-top: none;
+                padding: 0;
+                gap: 10px;
+            }
+
+            .sidebar-footer button {
+                width: auto;
+            }
+
+            main {
+                padding: 16px;
+            }
+
+            .header-card {
+                padding: 16px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar .spacer {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .toolbar input[name="name"] {
+                width: 100%;
+            }
+
+            .modal-card {
+                padding: 20px;
+            }
+
+            .pagination {
+                flex-wrap: wrap;
+            }
+
+            .table-card {
+                padding: 8px 16px;
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 560px;
+            }
+
+            .inline-edit-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .inline-edit-form input[name="name"],
+            .inline-edit-form input[name="maxCapacity"] {
+                width: 100%;
+            }
+
+            .inline-edit-form .actions-inline {
+                margin-left: 0;
+            }
+
+            .inline-edit-form .actions-inline button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar(active='admin-rooms', username=${username}, isAdmin=${isAdmin})}"></div>
+<main>
+    <div class="rooms-content">
+        <div class="header-card">
+            <h1>Salas</h1>
+            <p class="subtitle">Editá nombre y capacidad, deshabilitá una sala para que deje de admitir reservas nuevas (las reservas ya hechas no se tocan), o agregá una nueva.</p>
+
+            <div class="toolbar">
+                <form class="search-form" th:action="@{/admin/rooms}" method="get">
+                    <div class="field">
+                        <label for="name">Buscar por nombre</label>
+                        <input type="text" id="name" name="name" placeholder="Nombre de la sala" th:value="${nameFilter}"/>
+                    </div>
+                    <button class="submit" type="submit">Buscar</button>
+                    <a class="btn-secondary" th:if="${nameFilter}" th:href="@{/admin/rooms}">Limpiar</a>
+                </form>
+
+                <div class="spacer">
+                    <button type="button" class="submit" id="open-create-modal">+ Nueva Sala</button>
+                </div>
+            </div>
+        </div>
+
+        <p class="empty-state" th:if="${#lists.isEmpty(rooms) and nameFilter}"
+           th:text="'No se encontraron salas para \'' + ${nameFilter} + '\'.'">No se encontraron salas.</p>
+        <p class="empty-state" th:if="${#lists.isEmpty(rooms) and #strings.isEmpty(nameFilter)}">No hay salas cargadas.</p>
+
+        <div class="table-card" th:unless="${#lists.isEmpty(rooms)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th class="capacity">Capacidad</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="room : ${rooms}">
+                    <tr class="view-row" th:id="'view-' + ${room.id}">
+                        <td th:text="${room.name}">Sala A</td>
+                        <td class="capacity" th:text="${room.maxCapacity}">10</td>
+                        <td>
+                            <span class="status" th:classappend="${room.active} ? 'active' : 'other'"
+                                  th:text="${room.active} ? 'Habilitada' : 'Deshabilitada'">Estado</span>
+                        </td>
+                        <td class="actions">
+                            <button type="button" class="icon-btn js-edit-toggle" title="Editar"
+                                    th:data-room-id="${room.id}">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <form th:action="@{/admin/rooms/{id}/toggle-active(id=${room.id})}" method="post">
+                                <button type="submit" class="icon-btn" th:classappend="${room.active} ? 'danger' : 'success'"
+                                        th:title="${room.active} ? 'Deshabilitar' : 'Habilitar'">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                                    </svg>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr class="edit-row" th:id="'edit-' + ${room.id}">
+                        <td colspan="4">
+                            <form class="inline-edit-form" th:action="@{/admin/rooms/{id}(id=${room.id})}" method="post">
+                                <div class="field">
+                                    <label th:for="'name-' + ${room.id}">Nombre</label>
+                                    <input type="text" th:id="'name-' + ${room.id}" name="name" th:value="${room.name}" required/>
+                                </div>
+                                <div class="field">
+                                    <label th:for="'maxCapacity-' + ${room.id}">Capacidad</label>
+                                    <input type="number" th:id="'maxCapacity-' + ${room.id}" name="maxCapacity" min="1" th:value="${room.maxCapacity}" required/>
+                                </div>
+                                <div class="actions-inline">
+                                    <button class="submit" type="submit">Guardar</button>
+                                    <button class="cancel js-edit-toggle" type="button" th:data-room-id="${room.id}">Cancelar</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" th:if="${pageInfo.totalPages > 1}">
+            <a th:if="${!pageInfo.first}" class="btn-secondary"
+               th:href="@{/admin/rooms(name=${nameFilter}, page=${pageInfo.number - 1})}">◀ Anterior</a>
+            <span th:unless="${!pageInfo.first}" class="btn-secondary disabled">◀ Anterior</span>
+
+            <span class="page-info">Página <span th:text="${pageInfo.number + 1}">1</span> de
+                <span th:text="${pageInfo.totalPages}">1</span>
+                (<span th:text="${pageInfo.totalElements}">0</span> salas)</span>
+
+            <a th:if="${!pageInfo.last}" class="btn-secondary"
+               th:href="@{/admin/rooms(name=${nameFilter}, page=${pageInfo.number + 1})}">Siguiente ▶</a>
+            <span th:unless="${!pageInfo.last}" class="btn-secondary disabled">Siguiente ▶</span>
+        </div>
+    </div>
+</main>
+
+<div class="modal-overlay" id="create-modal">
+    <div class="modal-card">
+        <h2>Nueva sala</h2>
+        <form class="modal-form" th:action="@{/admin/rooms}" method="post">
+            <div class="field">
+                <label for="new-name">Nombre</label>
+                <input type="text" id="new-name" name="name" placeholder="Nombre" required/>
+            </div>
+            <div class="field">
+                <label for="new-capacity">Capacidad</label>
+                <input type="number" id="new-capacity" name="maxCapacity" min="1" required/>
+            </div>
+            <div class="checkbox-field">
+                <input type="checkbox" id="new-active" name="active" value="true" checked/>
+                <label for="new-active">Habilitada</label>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel" type="button" id="close-create-modal">Cancelar</button>
+                <button class="submit" type="submit">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-overlay" id="result-modal" th:classappend="${success != null or error != null} ? 'open'">
+    <div class="modal-card">
+        <h2 th:if="${success != null}">Listo</h2>
+        <h2 th:if="${error != null}">No se pudo completar</h2>
+        <p class="modal-message" th:if="${success != null}">Los cambios se guardaron correctamente.</p>
+        <p class="modal-message" th:if="${error != null}" th:text="${error}">Error</p>
+        <div class="modal-actions">
+            <button class="submit" type="button" id="result-modal-accept">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleEdit(id) {
+        const view = document.getElementById('view-' + id);
+        const edit = document.getElementById('edit-' + id);
+        const isEditing = edit.style.display === 'table-row';
+        view.style.display = isEditing ? 'table-row' : 'none';
+        edit.style.display = isEditing ? 'none' : 'table-row';
+    }
+
+    document.querySelectorAll('.js-edit-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            toggleEdit(btn.getAttribute('data-room-id'));
+        });
+    });
+
+    const createModal = document.getElementById('create-modal');
+    document.getElementById('open-create-modal').addEventListener('click', function () {
+        createModal.classList.add('open');
+    });
+    document.getElementById('close-create-modal').addEventListener('click', function () {
+        createModal.classList.remove('open');
+    });
+    createModal.addEventListener('click', function (event) {
+        if (event.target === createModal) {
+            createModal.classList.remove('open');
+        }
+    });
+
+    const resultModal = document.getElementById('result-modal');
+    document.getElementById('result-modal-accept').addEventListener('click', function () {
+        resultModal.classList.remove('open');
+    });
+</script>
+</body>
+</html>
